@@ -13,13 +13,6 @@ def index():
     with open('./frontend/dist/index.html', 'r') as f:
        body = f.read()
     return Response(body=body, headers={'Content-Type': 'text/html'})
-
-@app.route('/test/<path:path>', methods=['GET'], cors=cors_config)
-def assets(path):
-    asset = app.current_request.static_asset(path)
-    with open('./frontend/dist/index.html', 'r') as f:
-       body = f.read()
-    return Response(body=body, headers={'Content-Type': 'text/html'})
   
 @app.route('/assets/<path:path>', methods=['GET'], cors=cors_config)
 def assets(path):
