@@ -1,29 +1,30 @@
-from chalice import Chalice
+from chalice import Chalice, Response, CORSConfig
 
 app = Chalice(app_name='myapp')
+app.debug = True
 
+cors_config = CORSConfig(
+    allow_origin=['http://localhost/*'],
+    allow_headers=['X-Requested-With', 'Content-Type', 'Accept'],
+)
 
-@app.route('/')
+@app.route('/', methods=['GET'], cors=cors_config)
 def index():
-    return {'hello': 'world'}
+    with open('./frontend/dist/index.html', 'r') as f:
+       body = f.read()
+    return Response(body=body, headers={'Content-Type': 'text/html'})
 
-
-# The view function above will return {"hello": "world"}
-# whenever you make an HTTP GET request to '/'.
-#
-# Here are a few more examples:
-#
-# @app.route('/hello/{name}')
-# def hello_name(name):
-#    # '/hello/james' -> {"hello": "james"}
-#    return {'hello': name}
-#
-# @app.route('/users', methods=['POST'])
-# def create_user():
-#     # This is the JSON body the user sent in their POST request.
-#     user_as_json = app.current_request.json_body
-#     # We'll echo the json body back to the user in a 'user' key.
-#     return {'user': user_as_json}
-#
-# See the README documentation for more examples.
-#
+@app.route('/test/<path:path>', methods=['GET'], cors=cors_config)
+def assets(path):
+    asset = app.current_request.static_asset(path)
+    with open('./frontend/dist/index.html', 'r') as f:
+       body = f.read()
+    return Response(body=body, headers={'Content-Type': 'text/html'})
+  
+@app.route('/assets/<path:path>', methods=['GET'], cors=cors_config)
+def assets(path):
+    asset = app.current_request.static_asset(path)
+    if asset is not None:
+        return Response(body=asset.data, headers={'Content-Type': asset.content_type})
+    else:
+        return Response(body='File not found', status_code=404)
